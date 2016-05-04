@@ -27,6 +27,15 @@
 
 <script>
 (function() {
+    function escapeHtml(htmlText) {
+        return htmlText
+             .replace(/&/g, "&amp;")
+             .replace(/</g, "&lt;")
+             .replace(/>/g, "&gt;")
+             .replace(/"/g, "&quot;")
+             .replace(/'/g, "&#039;");
+    }
+         
     var choseongs = [ "ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ" ];
     var jungseongs = [ "ㅏ", "ㅐ", "ㅑ", "ㅒ", "ㅓ", "ㅔ", "ㅕ", "ㅖ", "ㅗ", "ㅘ", "ㅙ", "ㅚ", "ㅛ", "ㅜ", "ㅝ", "ㅞ", "ㅟ", "ㅠ", "ㅡ", "ㅢ", "ㅣ" ];
     var jongseongs = [ "", "ㄱ", "ㄲ", "ㄳ", "ㄴ", "ㄵ", "ㄶ", "ㄷ", "ㄹ", "ㄺ", "ㄻ", "ㄼ", "ㄽ", "ㄾ", "ㄿ", "ㅀ", "ㅁ", "ㅂ", "ㅄ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ" ];
@@ -81,8 +90,9 @@
         var character;
         var jamos;
         var outputText = [];
-        for(var i = 0; i < textInput.value.length; i++) {
-            character = textInput.value.charAt(i);
+        var inputText = escapeHtml(textInput.value);
+        for(var i = 0; i < inputText.length; i++) {
+            character = inputText.charAt(i);
             if(isHangulSyllable(character)) {
                 jamos = syllableToJamo(character);
                 outputText.push(jamos[0]);
@@ -107,7 +117,8 @@
             }
         }
         var textOutput = document.getElementById("textOutput");
-        textOutput.innerHTML = outputText.join("") + "<br/><br/>초성: " + choseongCount + "<br/>중성: " + jungseongCount + "<br/>종성: " + jongseongCount;
+        textOutput.innerHTML = outputText.join("") + "<br/><br/>초성: " + choseongCount + "<br/>중성: " + jungseongCount + 
+"<br/>종성: " + jongseongCount;
     });
 }());
 </script>
