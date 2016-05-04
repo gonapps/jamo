@@ -91,6 +91,8 @@
         var jamos;
         var outputText = [];
         var inputText = escapeHtml(textInput.value);
+        inputText = inputText.replace(/\s+/g, ' ');
+
         for(var i = 0; i < inputText.length; i++) {
             character = inputText.charAt(i);
             if(isHangulSyllable(character)) {
