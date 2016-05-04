@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8"/>
+    <title>자모 분석기</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,user-scalable=yes">
+    <script src="//code.jquery.com/jquery.min.js" type="text/javascript"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <style>*{word-wrap:break-word;max-width:100%}</style>
+</head>
+<body class="container">
+    <div class="col-md-6">
+        <h1 class="row">자모 분석기</h1>
+        <hr class="row"/>
+        <input id="fileInput" class="row" type="file"></input>
+        <br class="row"/>
+        <textarea id="textInput" class="row resize" style="width:100%" rows="10"></textarea>
+        <div class="row"></div>
+        <button id="processButton" class="row btn btn-default">분석</button>
+        <div class="row"><br/></div>
+        <div id="textOutput" class="row well well-md"></div>
+    </div>
+
+<script>
+(function() {
+    var choseongs = [ "ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ" ];
+    var jungseongs = [ "ㅏ", "ㅐ", "ㅑ", "ㅒ", "ㅓ", "ㅔ", "ㅕ", "ㅖ", "ㅗ", "ㅘ", "ㅙ", "ㅚ", "ㅛ", "ㅜ", "ㅝ", "ㅞ", "ㅟ", "ㅠ", "ㅡ", "ㅢ", "ㅣ" ];
+    var jongseongs = [ "", "ㄱ", "ㄲ", "ㄳ", "ㄴ", "ㄵ", "ㄶ", "ㄷ", "ㄹ", "ㄺ", "ㄻ", "ㄼ", "ㄽ", "ㄾ", "ㄿ", "ㅀ", "ㅁ", "ㅂ", "ㅄ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ" ];
+
+    function isHangulSyllable(character) {
+        return (0xAC00 <= character.charCodeAt(0) && character.charCodeAt(0) <= 0xD79F);
+    }
+
+    function isChoseong(character) {
+        return (choseongs.indexOf(character) != -1);
+    }
+
+    function isJungseong(character) {
+        return (jungseongs.indexOf(character) != -1);
+    }
+
+    function isJongseong(character) {
+        return (character != "" && jongseongs.indexOf(character) != -1);
+    }
+
+    function syllableToJamo(syllable) {
+        var temp = syllable.charCodeAt(0) - 0xAC00;
+        var choseong, jungseong, jongseong;
+        jongseong = temp % 28;
+        jungseong = ((temp - jongseong) / 28) % 21
+        choseong = (((temp - jongseong) / 28) - jungseong) / 21
+        return [choseongs[choseong], jungseongs[jungseong], jongseongs[jongseong]];
+    }
+
+    if(!(File && FileReader && FileList && Blob)) {
+        alert("File API Not Supported!");
+        throw new Error("File API Not Supported!");
+    }
+
+    var fileInput = document.getElementById("fileInput");
+    var textInput = document.getElementById("textInput");
+
+    fileInput.addEventListener("change", function(event) {
+        var file = fileInput.files[0];
+        var fileReader = new FileReader();
+        fileReader.onload = function(event) {
+            textInput.value = fileReader.result;
+        };
+        fileReader.readAsText(file);
+    });
+
+    var processButton = document.getElementById("processButton");
+    processButton.addEventListener("click", function(event) {
+        var choseongCount = 0;
+        var jungseongCount = 0;
+        var jongseongCount = 0;
+        var character;
+        var jamos;
+        var outputText = [];
+        for(var i = 0; i < textInput.value.length; i++) {
+            character = textInput.value.charAt(i);
+            if(isHangulSyllable(character)) {
+                jamos = syllableToJamo(character);
+                outputText.push(jamos[0]);
+                ++choseongCount;
+                outputText.push(jamos[1]);
+                ++jungseongCount;
+                if(isJongseong(jamos[2])) {
+                    outputText.push(jamos[2]);
+                    ++jongseongCount;
+                }
+                outputText.push("$");
+            } else if(character == " ") {
+                outputText.push("#");
+            } else if(isChoseong(character)) {
+                outputText.push(character);
+                ++choseongCount;
+            } else if(isJungseong(character)) {
+                outputText.push(character);
+                ++jungseongCount;
+            } else {
+                outputText.push(character);
+            }
+        }
+        var textOutput = document.getElementById("textOutput");
+        textOutput.innerHTML = outputText.join("") + "<br/><br/>초성: " + choseongCount + "<br/>중성: " + jungseongCount + "<br/>종성: " + jongseongCount;
+    });
+}());
+</script>
+</body>
+</html>
