@@ -27,6 +27,14 @@
 
 <script>
 (function() {
+    function inherit(subType, superType){
+        function O() {}
+        O.prototype = superType.prototype;
+        var prototype = new O();
+        prototype.constructor = subType;
+        subType.prototype = prototype;
+    }
+
     function escapeHtml(htmlText) {
         return htmlText
              .replace(/&/g, "&amp;")
@@ -108,6 +116,8 @@
                 outputText.push("$");
             } else if(character == " ") {
                 outputText.push("#");
+            } else if(character == ".") {
+                outputText.push("#.%");
             } else if(isChoseong(character)) {
                 outputText.push(character);
                 ++choseongCount;
@@ -119,8 +129,7 @@
             }
         }
         var textOutput = document.getElementById("textOutput");
-        textOutput.innerHTML = outputText.join("") + "<br/><br/>초성: " + choseongCount + "<br/>중성: " + jungseongCount + 
-"<br/>종성: " + jongseongCount;
+        textOutput.innerHTML = outputText.join("") + "<br/><br/>초성: " + choseongCount + "<br/>중성: " + jungseongCount + "<br/>종성: " + jongseongCount;
     });
 }());
 </script>
