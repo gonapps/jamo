@@ -45,9 +45,8 @@
 
     function splitToSentences(text) {
         var sentences = [];
-        text.split(".%").forEach(function(entry) {
-            if(entry)
-                sentences.push(new Sentence(entry));
+        text.split(".%").filter(Boolean).forEach(function(sentenceText) {
+            sentences.push(new Sentence(sentenceText));
         });
         return sentences;
     }
@@ -59,9 +58,8 @@
 
     Sentence.prototype.splitToWords = function(sentence) {
         var words = [];
-        sentence.split(/#,?/).forEach(function(entry) {
-            if(entry)
-                words.push(new Word(entry));
+        sentence.split(/#,?/).filter(Boolean).forEach(function(wordText) {
+            words.push(new Word(wordText));
         });
         return words;
     };
@@ -109,6 +107,8 @@
     }
 
     function jamosToSyllable(jamos) {
+        if(typeof(jamos[2]) =="undefined") jamos[2] = "";
+        console.log(jamos);
         return String.fromCharCode(0xAC00 + 28 * 21 * choseongs.indexOf(jamos[0]) + 28 * jungseongs.indexOf(jamos[1]) + jongseongs.indexOf(jamos[2]));
     }
 
@@ -222,11 +222,14 @@
     var searchingButton = document.getElementById("searchingButton");
     var searchedOutput = document.getElementById("searchedOutput");
     searchingButton.addEventListener("click", function(event) {
-        var sentences = splitToSentences(disassembledOutputModel.disassembledText);        
+        var sentences = splitToSentences(disassembledOutputModel.disassembledText);
         var result = []; 
         var wordCount = 0;
         searchWords(sentences, searchingInput.value).forEach(function(word) {
-            result.push(word.text, "<br/>");
+            word.text.split("$").filter(Boolean).forEach(function(syllable) {
+                result.push(jamosToSyllable(syllable.split("").filter(Boolean)));
+            });
+            result.push("<br/>");
             ++wordCount;
         });
         searchedOutput.innerHTML = result.join("") + "<br/>단어(어절) 수: " + wordCount + "개";
