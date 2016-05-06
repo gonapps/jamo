@@ -39,7 +39,7 @@
     var jungseongs = [ "ㅏ", "ㅐ", "ㅑ", "ㅒ", "ㅓ", "ㅔ", "ㅕ", "ㅖ", "ㅗ", "ㅘ", "ㅙ", "ㅚ", "ㅛ", "ㅜ", "ㅝ", "ㅞ", "ㅟ", "ㅠ", "ㅡ", "ㅢ", "ㅣ" ];
     var jongseongs = [ "", "ㄱ", "ㄲ", "ㄳ", "ㄴ", "ㄵ", "ㄶ", "ㄷ", "ㄹ", "ㄺ", "ㄻ", "ㄼ", "ㄽ", "ㄾ", "ㄿ", "ㅀ", "ㅁ", "ㅂ", "ㅄ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ" ];
 
-    function isHangulSyllable(character) {
+    function isSyllable(character) {
         return (0xAC00 <= character.charCodeAt(0) && character.charCodeAt(0) <= 0xD79F);
     }
 
@@ -55,13 +55,20 @@
         return (character != "" && jongseongs.indexOf(character) != -1);
     }
 
-    function syllableToJamo(syllable) {
-        var temp = syllable.charCodeAt(0) - 0xAC00;
+    function syllableToJamos(syllable) {
         var choseong, jungseong, jongseong;
-        jongseong = temp % 28;
-        jungseong = ((temp - jongseong) / 28) % 21
-        choseong = (((temp - jongseong) / 28) - jungseong) / 21
+        jongseong = (syllable.charCodeAt(0) - 0xAC00) % 28;
+        jungseong = ((syllable.charCodeAt(0) - 0xAC00 - jongseong) / 28) % 21
+        choseong = (((syllable.charCodeAt(0) - 0xAC00 - jongseong) / 28) - jungseong) / 21
         return [choseongs[choseong], jungseongs[jungseong], jongseongs[jongseong]];
+    }
+
+    function jamosToSyllable(jamos) {
+        return String.fromCharCode(0xAC00 + 28 * 21 * choseongs.indexOf(jamos[0]) + 28 * jungseongs.indexOf(jamos[1]) + jongseongs.indexOf(jamos[2]));
+    }
+
+    function collapseWhitespaces(inputText) {
+        return inputText.replace(/ +/g, " ").replace(/\n+/g, "");
     }
 
     function process(inputText) {
@@ -70,37 +77,37 @@
         var jongseongCount = 0;
         var character;
         var jamos;
-        var outputText = [];
-        inputText = inputText.replace(/\s+/g, ' ');
+        var processedText = [];
+        inputText = collapseWhitespaces(inputText);
 
         for(var i = 0; i < inputText.length; i++) {
             character = inputText.charAt(i);
-            if(isHangulSyllable(character)) {
-                jamos = syllableToJamo(character);
-                outputText.push(jamos[0]);
+            if(isSyllable(character)) {
+                jamos = syllableToJamos(character);
+                processedText.push(jamos[0]);
                 ++choseongCount;
-                outputText.push(jamos[1]);
+                processedText.push(jamos[1]);
                 ++jungseongCount;
                 if(isJongseong(jamos[2])) {
-                    outputText.push(jamos[2]);
+                    processedText.push(jamos[2]);
                     ++jongseongCount;
                 }
-                outputText.push("$");
+                processedText.push("$");
             } else if(character == " ") {
-                outputText.push("#");
+                processedText.push("#");
             } else if(character == ".") {
-                outputText.push("#.%");
+                processedText.push("#.%");
             } else if(isChoseong(character)) {
-                outputText.push(character);
+                processedText.push(character);
                 ++choseongCount;
             } else if(isJungseong(character)) {
-                outputText.push(character);
+                processedText.push(character);
                 ++jungseongCount;
             } else {
-                outputText.push(character);
+                processedText.push(character);
             }
         }
-        return outputText.join("") + "<br/><br/>" + "초성: " + choseongCount + "개<br/>" + "중성: " + jungseongCount + "개<br/>" + "종성: " + jongseongCount + "개";
+        return {processedText: processedText.join(""), choseongCount:  choseongCount, jungseongCount: jungseongCount, jongseongCount: jongseongCount};
     }
 
 
@@ -114,7 +121,7 @@
              .replace(/&/g, "&amp;")
              .replace(/</g, "&lt;")
              .replace(/>/g, "&gt;")
-             .replace(/"/g, "&quot;")
+             .replace(/"/g, "&quot;") // "
              .replace(/'/g, "&#039;");
     }
 
@@ -133,7 +140,8 @@
     });
 
     processButton.addEventListener("click", function(event) {
-        textOutput.innerHTML = process(escapeHtml(textInput.value));
+        var outputModel = process(escapeHtml(textInput.value));
+        textOutput.innerHTML = outputModel.processedText + "<br/><br/>" + "초성: " + outputModel.choseongCount + "개<br/>" + "중성: " + outputModel.jungseongCount + "개<br/>" + "종성: " + outputModel.jongseongCount + "개";
     });
 }());
 </script>
