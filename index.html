@@ -224,10 +224,12 @@
     searchingButton.addEventListener("click", function(event) {
         var sentences = splitToSentences(disassembledOutputModel.disassembledText);        
         var result = []; 
+        var wordCount = 0;
         searchWords(sentences, searchingInput.value).forEach(function(word) {
             result.push(word.text, "<br/>");
+            ++wordCount;
         });
-        searchedOutput.innerHTML = result.join("");
+        searchedOutput.innerHTML = result.join("") + "<br/>단어(어절) 수: " + wordCount + "개";
     });
 }());
 </script>
