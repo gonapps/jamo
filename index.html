@@ -25,8 +25,7 @@
         <div id="disassembledOutput" class="row well well-md"></div>
 
         <div class="row"></div>
-
-        <input id="searchingInput" class="row" type="text"></input>
+        <input id="searchingInput" class="row" type="text" placeholder="입력 가능 문자: 자음, 모음, $(음절 구분), *(와일드카드)" style="width:100%"></input>
         <div class="row"></div>
         <button id="searchingButton" class="row btn btn-default">검색</button>
         <div class="row"><br/></div>
@@ -108,7 +107,6 @@
 
     function jamosToSyllable(jamos) {
         if(typeof(jamos[2]) =="undefined") jamos[2] = "";
-        console.log(jamos);
         return String.fromCharCode(0xAC00 + 28 * 21 * choseongs.indexOf(jamos[0]) + 28 * jungseongs.indexOf(jamos[1]) + jongseongs.indexOf(jamos[2]));
     }
 
@@ -222,12 +220,17 @@
     var searchingButton = document.getElementById("searchingButton");
     var searchedOutput = document.getElementById("searchedOutput");
     searchingButton.addEventListener("click", function(event) {
+        if(typeof(disassembledOutputModel) == "undefined") return;
         var sentences = splitToSentences(disassembledOutputModel.disassembledText);
         var result = []; 
         var wordCount = 0;
         searchWords(sentences, searchingInput.value).forEach(function(word) {
-            word.text.split("$").filter(Boolean).forEach(function(syllable) {
-                result.push(jamosToSyllable(syllable.split("").filter(Boolean)));
+            word.text.split("$").filter(Boolean).forEach(function(jamos) {
+                var syllable = jamosToSyllable(jamos.split("").filter(Boolean));
+                if(isSyllable(syllable))
+                    result.push(syllable);
+                else
+                    result.push(jamos);
             });
             result.push("<br/>");
             ++wordCount;
