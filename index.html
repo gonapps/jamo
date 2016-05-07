@@ -19,11 +19,9 @@ You should have received a copy of the GNU General Public License along with thi
     <style>*{word-wrap:break-word;max-width:100%}</style>
 </head>
 <body class="container">
-    <div class="col-md-6 form-group">
+    <div class="col-md-6">
         <h1 class="row"><a href=".">자모 분석기</a></h1>
         <hr class="row"/>
-        <label for="encodingInput">파일 인코딩: </label>
-        <input id="encodingInput" name="encodingInput" type="text" value="CP949"></input>
         <input id="fileInput" class="row" type="file"></input>
         <br class="row"/>
         <textarea id="textInput" class="row resize" style="width:100%" rows="10"></textarea>
@@ -31,6 +29,7 @@ You should have received a copy of the GNU General Public License along with thi
         <button id="disassemblingButton" class="row btn btn-default">분해</button>
         <div class="row"><br/></div>
         <div id="disassembledOutput" class="row well well-md"></div>
+
         <div class="row"></div>
         <input id="searchingInput" class="row" type="text" placeholder="입력 가능 문자: 자음, 모음, $(음절 구분), *(와일드카드)" style="width:100%"></input>
         <div class="row"></div>
@@ -38,6 +37,7 @@ You should have received a copy of the GNU General Public License along with thi
         <div class="row"><br/></div>
         <div id="searchedOutput" class="row well well-md"></div>
     </div>
+
 <script>
 (function() {
     function inherit(subType, superType){
@@ -190,32 +190,19 @@ You should have received a copy of the GNU General Public License along with thi
              .replace(/"/g, "&quot;") // "
              .replace(/'/g, "&#039;");
     }
-    var encodingInput = document.getElementById("encodingInput");
+
     var fileInput = document.getElementById("fileInput");
     var textInput = document.getElementById("textInput");
     var disassemblingButton = document.getElementById("disassemblingButton");
     var disassembledOutput = document.getElementById("disassembledOutput");
-
-    encodingInput.addEventListener("change", function() {
-        var file = fileInput.files[0];
-        if(typeof(file) == "undefined") {
-            console.log("file not selected");
-            return;
-        }
-        var fileReader = new FileReader();
-        fileReader.onload = function(event) {
-            textInput.value = fileReader.result;
-        };
-        fileReader.readAsText(file, encodingInput.value);
-    });
  
-    fileInput.addEventListener("change", function() {
+    fileInput.addEventListener("change", function(event) {
         var file = fileInput.files[0];
         var fileReader = new FileReader();
         fileReader.onload = function(event) {
             textInput.value = fileReader.result;
         };
-        fileReader.readAsText(file, encodingInput.value);
+        fileReader.readAsText(file);
     });
 
     var disassembledOutputModel;
