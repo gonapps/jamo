@@ -1,4 +1,4 @@
-# jamo
+# jamo [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 http://gonapps.github.io/jamo<br/>
 
 Copyright (c) 2016, Byeonggon Lee gonny952@gmail.com
